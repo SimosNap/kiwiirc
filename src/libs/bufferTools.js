@@ -81,7 +81,11 @@ export function orderedMessages(buffer, opts = {}) {
     let list = [];
     for (let i = messages.length - 1; i >= 0; i--) {
         // don't include hidden message types
-        if (hiddenMessageTypes.includes(messages[i].type) && !typeExtraIncludesSelf(messages[i])) {
+        if (
+            hiddenMessageTypes.includes(messages[i].type) &&
+            !typeExtraIncludesSelf(messages[i]) &&
+            messages[i].type_extra !== 'kick'
+        ) {
             continue;
         }
 

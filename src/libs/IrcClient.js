@@ -605,43 +605,41 @@ function clientMiddleware(state, network) {
             }
 
             let messageBody = '';
-            let ignoreEvent = state.setting('skipHiddenMessages') && !buffer.setting('show_joinparts');
-            let isUserInvolved = [event.kicked, event.nick].includes(client.user.nick);
-            if (!ignoreEvent || isUserInvolved) {
-                if (event.kicked === client.user.nick) {
-                    messageBody = TextFormatting.formatAndT(
-                        'channel_selfkick',
-                        { reason: event.message },
-                        'kicked_you_from',
-                        {
-                            nick: TextFormatting.formatUser(event),
-                            channel: event.channel,
-                        }
-                    );
-                } else {
-                    messageBody = TextFormatting.formatAndT(
-                        'channel_kicked',
-                        { reason: event.message },
-                        'was_kicked_from',
-                        {
-                            nick: event.kicked,
-                            channel: event.channel,
-                            chanop: TextFormatting.formatUser(event.nick),
-                        }
-                    );
-                }
 
-                let typeExtra = (isUserInvolved) ? 'kick_self' : 'kick';
-
-                state.addMessage(buffer, {
-                    time: eventTime,
-                    server_time: serverTime,
-                    nick: event.nick,
-                    message: messageBody,
-                    type: 'traffic',
-                    type_extra: typeExtra,
-                });
+            if (event.kicked === client.user.nick) {
+                messageBody = TextFormatting.formatAndT(
+                    'channel_selfkick',
+                    { reason: event.message },
+                    'kicked_you_from',
+                    {
+                        nick: TextFormatting.formatUser(event),
+                        channel: event.channel,
+                    }
+                );
+            } else {
+                messageBody = TextFormatting.formatAndT(
+                    'channel_kicked',
+                    { reason: event.message },
+                    'was_kicked_from',
+                    {
+                        nick: event.kicked,
+                        channel: event.channel,
+                        chanop: TextFormatting.formatUser(event.nick),
+                    }
+                );
             }
+
+            let isUserInvolved = [event.kicked, event.nick].includes(client.user.nick);
+            let typeExtra = isUserInvolved ? 'kick_self' : 'kick';
+
+            state.addMessage(buffer, {
+                time: eventTime,
+                server_time: serverTime,
+                nick: event.nick,
+                message: messageBody,
+                type: 'traffic',
+                type_extra: typeExtra,
+            });
         }
         if (command === 'part') {
             let buffer = state.getBufferByName(networkid, event.channel);
